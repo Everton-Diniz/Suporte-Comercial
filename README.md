@@ -1,5 +1,9 @@
 # Desenvolvimento Visual de Janelas
  Ramificação criada para atender o desenvolvimento visual das telas do software:
+## Menu Inicial
+---
+![image](https://github.com/user-attachments/assets/109fbf76-aa2f-4985-8991-56fd8e7eabda)
+
 ## Cadastro Fornecedor
 ---
 ![image](https://github.com/user-attachments/assets/527038b4-d977-4e3f-98ce-1be6b2385eea)
