@@ -57,11 +57,8 @@ class GerenciadorJanelas:
             def Cadastrar_Fornecedor():
                 #Verifica a existencia do arquivo .json responsavel por conter os registros de fornecedores.
                 if os.path.exists('Base Fornecedores/Fornecedores.json'):
-                    nome_forn = campo_nome_forn.get()
-                    nome_repr = campo_nome_repr.get()
-                    cnpj = campo_cnpj.get()
                     forn_cadastrados = {}
-                    fornecedor = [nome_forn, nome_repr, cnpj]
+                    fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
                     with open('Base Fornecedores/Fornecedores.json', 'r') as arquivo:
                         forn_cadastrados = json.load(arquivo)
                         if isinstance(forn_cadastrados, str):
@@ -76,11 +73,8 @@ class GerenciadorJanelas:
                     
                     apagar()
                 else:
-                    nome_forn = campo_nome_forn.get()
-                    nome_repr = campo_nome_repr.get()
-                    cnpj = campo_cnpj.get()
                     forn_cadastrados = {}
-                    fornecedor = [nome_forn, nome_repr, cnpj]
+                    fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
                     forn_cadastrados[len(forn_cadastrados)+1] = fornecedor
                     try:
                         with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
