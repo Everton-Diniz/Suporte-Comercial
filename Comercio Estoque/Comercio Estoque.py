@@ -1,9 +1,19 @@
 import customtkinter as ctk
+import json
+import os
+import os.path
 
 #Gerencia as janelas abertas para garantir o menor uso de Memoria com janelas inativas.
 class GerenciadorJanelas:
 
     def __init__(self):
+        #Verifica a existencia das pastas essenciais, e garante a criação delas caso não existam.
+        if os.path.exists('Base Fornecedores') == False:
+            os.mkdir('Base Fornecedores')
+        if os.path.exists('Base Itens') == False:
+            os.mkdir('Base Itens')
+        if os.path.exists('Base Histórico') == False:
+            os.mkdir('Base Histórico')
         
         #Gerando a janela de menu inicial
         self.menu = ctk.CTk()
@@ -43,7 +53,83 @@ class GerenciadorJanelas:
             #chama a função fechar_janela quando o evento de fechar a jenala ativa for ativado.
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
-            fonte_padrao = ('arial', 15, 'bold')
+            #funções
+            def Cadastrar_Fornecedor():
+                #Verifica a existencia do arquivo .json responsavel por conter os registros de fornecedores.
+                if os.path.exists('Base Fornecedores/Fornecedores.json'):
+                    nome_forn = campo_nome_forn.get()
+                    nome_repr = campo_nome_repr.get()
+                    cnpj = campo_cnpj.get()
+                    forn_cadastrados = {}
+                    fornecedor = [nome_forn, nome_repr, cnpj]
+                    with open('Base Fornecedores/Fornecedores.json', 'r') as arquivo:
+                        forn_cadastrados = json.load(arquivo)
+                        if isinstance(forn_cadastrados, str):
+                            forn_cadastrados = {}
+
+                        forn_cadastrados[len(forn_cadastrados)+1] = fornecedor
+                        try:
+                            with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
+                                json.dump(forn_cadastrados, arquivo, indent=4)
+                        except IOError as e:
+                            print(f'Erro {e}')
+                    
+                    apagar()
+                else:
+                    nome_forn = campo_nome_forn.get()
+                    nome_repr = campo_nome_repr.get()
+                    cnpj = campo_cnpj.get()
+                    forn_cadastrados = {}
+                    fornecedor = [nome_forn, nome_repr, cnpj]
+                    forn_cadastrados[len(forn_cadastrados)+1] = fornecedor
+                    try:
+                        with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
+                            json.dump(forn_cadastrados, arquivo, indent=4)
+                    except IOError as e:
+                        print(f'Erro {e}')
+                    
+                    apagar()
+
+            def apagar():
+                campo_nome_forn.delete(0,ctk.END)
+                campo_nome_repr.delete(0, ctk.END)
+                campo_cnpj.delete(0, ctk.END)
+
+            def maiuscula(ferramenta):
+                texto = ferramenta.widget.get()
+                texto = texto.upper()
+                ferramenta.widget.delete(0, ctk.END)
+                ferramenta.widget.insert(0, texto)
+            
+            def modelo_cnpj(ferramenta):
+                texto = str(ferramenta.widget.get())
+                if ferramenta.keycode > 48 and ferramenta.keycode < 58 or ferramenta.keycode > 96 and ferramenta.keycode < 105:
+                    if len(texto) > 3 and texto.count('.') < 1:
+                        texto = texto[0:3] + '.' + texto[-1:]
+                        ferramenta.widget.delete(0, ctk.END)
+                        ferramenta.widget.insert(0, texto)
+                    elif len(texto) > 7 and texto.count('.') < 2:
+                        texto = texto[0:7] + '.' + texto[-1:]
+                        ferramenta.widget.delete(0, ctk.END)
+                        ferramenta.widget.insert(0, texto)
+                    elif len(texto) > 11 and texto.count('/') < 1:
+                        texto = texto[0:11] + '/' + texto[-1:]
+                        ferramenta.widget.delete(0, ctk.END)
+                        ferramenta.widget.insert(0, texto)
+                    elif len(texto) > 16 and texto.count('-') < 1:
+                        texto = texto[0:16] + '-' + texto[-1:]
+                        ferramenta.widget.delete(0, ctk.END)
+                        ferramenta.widget.insert(0, texto)
+                    elif len(texto) > 19:
+                        texto = texto[0:19]
+                        ferramenta.widget.delete(0, ctk.END)
+                        ferramenta.widget.insert(0, texto)
+                else:
+                    texto = texto[0:len(texto)-1]
+                    ferramenta.widget.delete(0, ctk.END)
+                    ferramenta.widget.insert(0, texto)
+
+            fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.1
     
@@ -52,12 +138,12 @@ class GerenciadorJanelas:
             titulo_nome_repr = ctk.CTkLabel(self.janela, text='Nome do Representante de Vendas:', font=fonte_padrao)
             titulo_cnpj = ctk.CTkLabel(self.janela, text='CNPJ:', font=fonte_padrao)
             #campos
-            campo_nome_forn = ctk.CTkEntry(self.janela, placeholder_text='Insira o Nome do Fornecedor.')
-            campo_nome_repr = ctk.CTkEntry(self.janela, placeholder_text='Insira o Nome do Representante.')
-            campo_cnpj = ctk.CTkEntry(self.janela, placeholder_text='insira o CNPJ.')
+            campo_nome_forn = ctk.CTkEntry(self.janela, placeholder_text='INSIRA O NOME DO FORNECEDOR.')
+            campo_nome_repr = ctk.CTkEntry(self.janela, placeholder_text='INSIRA O NOME DO REPRESENTANTE.')
+            campo_cnpj = ctk.CTkEntry(self.janela, placeholder_text='000.000.000/0000-00')
             #botoes
-            botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao)
-            botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao)
+            botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao, command=Cadastrar_Fornecedor)
+            botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao, command=apagar)
 
             #posicionamento
             titulo_nome_forn.place(relx=posicao_x, rely=posicao_y)
@@ -71,6 +157,11 @@ class GerenciadorJanelas:
 
             botao_confirmar.place(relx=posicao_x, rely=posicao_y * 8.7)
             botao_apagar.place(relx=posicao_x * 13.7, rely=posicao_y * 8.7)
+
+            #Eventos
+            campo_nome_forn.bind('<KeyRelease>', maiuscula)
+            campo_nome_repr.bind('<KeyRelease>', maiuscula)
+            campo_cnpj.bind('<KeyRelease>', modelo_cnpj)
 
             #exibi a janela ativa ocultando a janela menu
             self.abrir_janela()
@@ -113,7 +204,7 @@ class GerenciadorJanelas:
             self.janela.geometry('600x475')
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
-            fonte_padrao = ('arial', 15, 'bold')
+            fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.07
 
@@ -180,7 +271,7 @@ class GerenciadorJanelas:
             self.janela.geometry('600x600')
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
-            fonte_padrao = ('arial', 15, 'bold')
+            fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.04
 
@@ -242,7 +333,7 @@ class GerenciadorJanelas:
             self.janela.geometry('600x600')
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
-            fonte_padrao = ('arial', 15, 'bold')
+            fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.04
 
@@ -286,7 +377,7 @@ class GerenciadorJanelas:
             self.janela.geometry('600x600')
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
-            fonte_padrao = ('arial', 15, 'bold')
+            fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.04
 
