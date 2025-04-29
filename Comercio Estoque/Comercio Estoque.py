@@ -54,47 +54,66 @@ class GerenciadorJanelas:
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
             #funções
+            #Responsavel por realizar o cadastro com segurança dos dados do Fornecedor
             def Cadastrar_Fornecedor():
-                #Verifica a existencia do arquivo .json responsavel por conter os registros de fornecedores.
-                if os.path.exists('Base Fornecedores/Fornecedores.json'):
-                    forn_cadastrados = {}
-                    fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
-                    with open('Base Fornecedores/Fornecedores.json', 'r') as arquivo:
-                        forn_cadastrados = json.load(arquivo)
-                        if isinstance(forn_cadastrados, str):
-                            forn_cadastrados = {}
+                #verifica se todos os campos foram preenchidos
+                if campo_nome_forn.get() != '' and campo_nome_repr.get() != '' and  campo_cnpj.get() != '':
+                    #Verifica a existencia do arquivo .json responsavel por conter os registros de fornecedores.
+                    if os.path.exists('Base Fornecedores/Fornecedores.json'):
+                        forn_cadastrados = {}
+                        fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
+                        with open('Base Fornecedores/Fornecedores.json', 'r') as arquivo:
+                            forn_cadastrados = json.load(arquivo)
+                            cnpj_existente = False
 
+                            #valida a existencia de dois fornecedores com o mesmo cnpj
+                            for var_consul in forn_cadastrados:
+                                if fornecedor[2] in forn_cadastrados[var_consul]:
+                                    cnpj_existente = True
+                                    break
+                            print(f'{cnpj_existente}')
+                            if cnpj_existente:
+                                titulo_resultado.configure(text='O CNPJ já foi cadastrado', text_color='Red')
+                            else:
+                                if isinstance(forn_cadastrados, str):
+                                    forn_cadastrados = {}
+
+                                forn_cadastrados[len(forn_cadastrados)+1] = fornecedor
+                                try:
+                                    with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
+                                        json.dump(forn_cadastrados, arquivo, indent=4)
+                                        titulo_resultado.configure(text=f'Fornecedor foi Cadastrado com sucesso! Nº:{len(forn_cadastrados)}.', text_color='Green') 
+                                except IOError as e:
+                                    titulo_resultado.configure(text=f'Erro {e}') 
+                                    apagar()
+                    else:
+                        forn_cadastrados = {}
+                        fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
                         forn_cadastrados[len(forn_cadastrados)+1] = fornecedor
                         try:
                             with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
                                 json.dump(forn_cadastrados, arquivo, indent=4)
                         except IOError as e:
                             print(f'Erro {e}')
-                    
-                    apagar()
+                        titulo_resultado.configure(text=f'Fornecedor foi Cadastrado com sucesso! Nº:{len(forn_cadastrados)}.', text_color='Green')
+                        apagar()
                 else:
-                    forn_cadastrados = {}
-                    fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
-                    forn_cadastrados[len(forn_cadastrados)+1] = fornecedor
-                    try:
-                        with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
-                            json.dump(forn_cadastrados, arquivo, indent=4)
-                    except IOError as e:
-                        print(f'Erro {e}')
-                    
-                    apagar()
+                    titulo_resultado.configure(text='Todos os campos devem estar preenchidos.', text_color='Red')
 
+            #limpa os campos preenchidos
             def apagar():
                 campo_nome_forn.delete(0,ctk.END)
                 campo_nome_repr.delete(0, ctk.END)
                 campo_cnpj.delete(0, ctk.END)
 
+            #converte as letras minúsculas em letras maiúsculas
             def maiuscula(ferramenta):
                 texto = ferramenta.widget.get()
                 texto = texto.upper()
                 ferramenta.widget.delete(0, ctk.END)
                 ferramenta.widget.insert(0, texto)
             
+            #define o padrão e limita a entrada de caracteres para apenas numericos.
             def modelo_cnpj(ferramenta):
                 texto = str(ferramenta.widget.get())
                 if ferramenta.keycode > 48 and ferramenta.keycode < 58 or ferramenta.keycode > 96 and ferramenta.keycode < 105:
@@ -131,6 +150,7 @@ class GerenciadorJanelas:
             titulo_nome_forn = ctk.CTkLabel(self.janela, text='Nome do Fornecedor:', font=fonte_padrao)
             titulo_nome_repr = ctk.CTkLabel(self.janela, text='Nome do Representante de Vendas:', font=fonte_padrao)
             titulo_cnpj = ctk.CTkLabel(self.janela, text='CNPJ:', font=fonte_padrao)
+            titulo_resultado = ctk.CTkLabel(self.janela, text='', font=fonte_padrao)
             #campos
             campo_nome_forn = ctk.CTkEntry(self.janela, placeholder_text='INSIRA O NOME DO FORNECEDOR.')
             campo_nome_repr = ctk.CTkEntry(self.janela, placeholder_text='INSIRA O NOME DO REPRESENTANTE.')
@@ -149,10 +169,12 @@ class GerenciadorJanelas:
             titulo_cnpj.place(relx=posicao_x, rely=posicao_y * 5)
             campo_cnpj.place(relx=posicao_x, rely=posicao_y * 6, relwidth=0.23)
 
+            titulo_resultado.place(relx=posicao_x, rely=posicao_y * 7.25)
+
             botao_confirmar.place(relx=posicao_x, rely=posicao_y * 8.7)
             botao_apagar.place(relx=posicao_x * 13.7, rely=posicao_y * 8.7)
 
-            #Eventos
+            #eventos
             campo_nome_forn.bind('<KeyRelease>', maiuscula)
             campo_nome_repr.bind('<KeyRelease>', maiuscula)
             campo_cnpj.bind('<KeyRelease>', modelo_cnpj)
@@ -168,12 +190,16 @@ class GerenciadorJanelas:
             #chama a função fechar_janela quando o evento de fechar a jenala ativa for ativado.
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
+            #funções
+
+
             fonte_padrao = ('arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.15
 
             #titulos
             titulo_categoria = ctk.CTkLabel(self.janela, text='Categoria:', font=fonte_padrao)
+            titulo_resultado = ctk.CTkLabel(self.janela, text='', font=fonte_padrao)
             #campos
             campo_categoria = ctk.CTkEntry(self.janela, placeholder_text='Insira o Nome da Categoria.')
             #botões
@@ -184,6 +210,7 @@ class GerenciadorJanelas:
             titulo_categoria.place(relx=posicao_x, rely=posicao_y)
 
             campo_categoria.place(relx=posicao_x, rely=posicao_y * 2, relwidth=0.6)
+            titulo_resultado.place(relx=posicao_x, rely=posicao_y * 3.25)
 
             botao_confirmar.place(relx=posicao_x, rely=posicao_y * 5.4)
             botao_apagar.place(relx=posicao_x * 13.7, rely=posicao_y * 5.4)
