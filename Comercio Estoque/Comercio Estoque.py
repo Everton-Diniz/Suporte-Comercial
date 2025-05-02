@@ -71,7 +71,6 @@ class GerenciadorJanelas:
                                 if fornecedor[2] in forn_cadastrados[var_consul]:
                                     cnpj_existente = True
                                     break
-                            print(f'{cnpj_existente}')
                             if cnpj_existente:
                                 titulo_resultado.configure(text='O CNPJ já foi cadastrado', text_color='Red')
                             else:
@@ -85,7 +84,7 @@ class GerenciadorJanelas:
                                         titulo_resultado.configure(text=f'Fornecedor foi Cadastrado com sucesso! Nº:{len(forn_cadastrados)}.', text_color='Green') 
                                 except IOError as e:
                                     titulo_resultado.configure(text=f'Erro {e}') 
-                                    apagar()
+                                apagar()
                     else:
                         forn_cadastrados = {}
                         fornecedor = [campo_nome_forn.get(), campo_nome_repr.get(), campo_cnpj.get()]
@@ -94,7 +93,7 @@ class GerenciadorJanelas:
                             with open('Base Fornecedores/Fornecedores.json', 'w') as arquivo:
                                 json.dump(forn_cadastrados, arquivo, indent=4)
                         except IOError as e:
-                            print(f'Erro {e}')
+                            titulo_resultado.configure(text=f'Erro {e}', text_color='red')
                         titulo_resultado.configure(text=f'Fornecedor foi Cadastrado com sucesso! Nº:{len(forn_cadastrados)}.', text_color='Green')
                         apagar()
                 else:
@@ -116,29 +115,33 @@ class GerenciadorJanelas:
             #define o padrão e limita a entrada de caracteres para apenas numericos.
             def modelo_cnpj(ferramenta):
                 texto = str(ferramenta.widget.get())
-                if ferramenta.keycode > 48 and ferramenta.keycode < 58 or ferramenta.keycode > 96 and ferramenta.keycode < 105:
+                if ferramenta.keycode > 48 and ferramenta.keycode < 58 or ferramenta.keycode > 96 and ferramenta.keycode < 105 or ferramenta.keycode > 36 and ferramenta.keycode < 41:
                     if len(texto) > 3 and texto.count('.') < 1:
-                        texto = texto[0:3] + '.' + texto[-1:]
+                        texto = texto[0:3] + '.' + texto[4:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
-                    elif len(texto) > 7 and texto.count('.') < 2:
-                        texto = texto[0:7] + '.' + texto[-1:]
+                    
+                    if len(texto) > 7 and texto.count('.') < 2:
+                        texto = texto[0:7] + '.' + texto[8:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
-                    elif len(texto) > 11 and texto.count('/') < 1:
-                        texto = texto[0:11] + '/' + texto[-1:]
+                    
+                    if len(texto) > 11 and texto.count('/') < 1:
+                        texto = texto[0:11] + '/' + texto[12:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
-                    elif len(texto) > 16 and texto.count('-') < 1:
-                        texto = texto[0:16] + '-' + texto[-1:]
+                    
+                    if len(texto) > 16 and texto.count('-') < 1:
+                        texto = texto[0:16] + '-' + texto[17:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
-                    elif len(texto) > 19:
+                    
+                    if len(texto) > 19:
                         texto = texto[0:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
                 else:
-                    texto = texto[0:len(texto)-1]
+                    texto = texto[0:texto.find(ferramenta.char)] + texto[texto.find(ferramenta.char)+1:20]
                     ferramenta.widget.delete(0, ctk.END)
                     ferramenta.widget.insert(0, texto)
 
@@ -192,6 +195,29 @@ class GerenciadorJanelas:
 
             #funções
 
+            def maiuscula(ferramenta):
+                texto = ferramenta.widget.get()
+                texto = texto.upper()
+                ferramenta.widget.delete(0, ctk.END)
+                ferramenta.widget.insert(0, texto)
+
+            def salvar_categoria():
+                if campo_categoria.get() != '':
+                    campo_categoria.get()
+                    if os.path.exists(f'Base Itens/{campo_categoria.get()}.json'):
+                        titulo_resultado.configure(text='Não é possivel criar uma categoria já existente.', text_color='red')
+                    else:
+                        try:
+                            with open(f'Base Itens/{campo_categoria.get()}.json', 'w') as arquivo:
+                                json.dump('', arquivo, indent=4)
+                                titulo_resultado.configure(text='Categoria criada com sucesso', text_color='green')
+                        except IOError as e:
+                            titulo_resultado.configure(text=f'Erro {e}', text_color='red')
+                else:
+                    titulo_resultado.configure(text='Por Favor, informe o nome da categoria.', text_color='red')
+
+            def apagar():
+                campo_categoria.delete(0,ctk.END)
 
             fonte_padrao = ('arial', 15, 'bold')
             posicao_x = 0.02
@@ -201,10 +227,10 @@ class GerenciadorJanelas:
             titulo_categoria = ctk.CTkLabel(self.janela, text='Categoria:', font=fonte_padrao)
             titulo_resultado = ctk.CTkLabel(self.janela, text='', font=fonte_padrao)
             #campos
-            campo_categoria = ctk.CTkEntry(self.janela, placeholder_text='Insira o Nome da Categoria.')
+            campo_categoria = ctk.CTkEntry(self.janela, placeholder_text='INSIRA O NOME DA CATEGORIA')
             #botões
-            botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao)
-            botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao)
+            botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao, command=salvar_categoria)
+            botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao, command=apagar)
 
             #posicionamento
             titulo_categoria.place(relx=posicao_x, rely=posicao_y)
@@ -215,6 +241,9 @@ class GerenciadorJanelas:
             botao_confirmar.place(relx=posicao_x, rely=posicao_y * 5.4)
             botao_apagar.place(relx=posicao_x * 13.7, rely=posicao_y * 5.4)
 
+            #eventos
+            campo_categoria.bind('<KeyRelease>', maiuscula)
+
             #exibi a janela ativa ocultando a janela menu
             self.abrir_janela()
 
@@ -224,6 +253,51 @@ class GerenciadorJanelas:
             self.janela.title('Comercio Estoque - Cadastro Item')
             self.janela.geometry('600x475')
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
+
+            def apagar():
+                campo_descricao.delete(0, ctk.END)
+                campo_ean.delete(0,ctk.END)
+                campo_dun.delete(0,ctk.END)
+                campo_fornecedor.delete(0,ctk.END)
+                campo_shelflife_max.delete(0,ctk.END)
+                campo_shelflife_min.delete(0,ctk.END)
+                campo_custo.delete(0,ctk.END)
+                validade_indef.deselect()
+                
+            def lista_categoria():
+                retorno = ''
+                try:
+                    nomes_categorias = [itens_lista for itens_lista in os.listdir('Base Itens/') if os.path.isfile(os.path.join('Base Itens/', itens_lista))]
+                    lista_nomes = ['']
+                    if len(nomes_categorias) > 0:
+                        for nome in nomes_categorias:
+                            lista_nomes.append(nome[0:nome.find('.')])
+                    else:
+                        retorno = 'Não existe categorias cadastradas.'
+                except FileNotFoundError:
+                    retorno = 'A pasta Base Itens não foi encontrada.'
+                except OSError as e:
+                    retorno = f'Erro ao acessar a pasta Base Itens: {e}'
+                return lista_nomes, retorno
+            
+            def lista_fornecedores():
+                lista_nome_forn = ['']
+                retorno = ''
+                if os.path.exists(f'Base Fornecedores/Fornecedores.json'):
+                    try:
+                        with open(f'Base Fornecedores/Fornecedores.json', 'r') as arquivo:
+                            fornecedores = json.load(arquivo)
+                            for nome in fornecedores:
+                                lista_nome_forn.append(nome[0])
+                    except FileNotFoundError:
+                        retorno = 'A pasta "Base Fornecedores" não foi encontrada'
+                    except OSError as e:
+                        retorno = f'Erro na tentativa de acessar a pasta Base Fornecedores: {e}'
+                else:
+                    retorno='Não existe fornecedores cadastrados.'
+                return lista_nome_forn, retorno
+        
+
 
             fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
@@ -238,24 +312,27 @@ class GerenciadorJanelas:
             titulo_shelflife = ctk.CTkLabel(self.janela, text='Shelf-life:', font=fonte_padrao)
             titulo_ex_shelflife = ctk.CTkLabel(self.janela, text='Ex: 300', font=('Arial', 15), text_color='#b5b5b5')
             titulo_custo = ctk.CTkLabel(self.janela, text='Custo de Compra', font=fonte_padrao)
+            titulo_resultado = ctk.CTkLabel(self.janela, text=lista_categoria()[1] + '\n' + lista_fornecedores()[1], font=fonte_padrao, text_color='red')
             #campos
             campo_descricao = ctk.CTkEntry(self.janela, placeholder_text='Insira a Descrição Resumida do item.')
             campo_ean = ctk.CTkEntry(self.janela, placeholder_text='Insira o EAN.')
             campo_dun = ctk.CTkEntry(self.janela, placeholder_text='Insira o DUN.')
-            campo_categoria = ctk.CTkComboBox(self.janela)
             campo_fornecedor = ctk.CTkEntry(self.janela, placeholder_text='Nº Forn.')
             campo_shelflife_min = ctk.CTkEntry(self.janela, placeholder_text='Min')
             campo_shelflife_max = ctk.CTkEntry(self.janela, placeholder_text='Max')
             campo_custo = ctk.CTkEntry(self.janela, placeholder_text='Ex: 5.25.')
+            #Lista
+            campo_categoria = ctk.CTkComboBox(self.janela, values=lista_categoria()[0])
+            campo_n_fornecedores = ctk.CTkComboBox(self.janela, values=lista_fornecedores()[0])
             #checkbox
             validade_indef = ctk.CTkCheckBox(self.janela, text='Validade Indefinida', font=fonte_padrao)
             #botoes
             botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao)
-            botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao)
+            botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao, command=apagar)
             
             #posicionamento
             titulo_descricao.place(relx=posicao_x, rely=posicao_y)
-            campo_descricao.place(relx=posicao_x, rely=posicao_y * 2, relwidth=0.763)
+            campo_descricao.place(relx=posicao_x, rely=posicao_y * 2, relwidth=0.775)
 
             titulo_ean.place(relx=posicao_x, rely=posicao_y * 3)
             campo_ean.place(relx=posicao_x, rely=posicao_y * 4, relwidth=0.2)
@@ -264,10 +341,11 @@ class GerenciadorJanelas:
             campo_dun.place(relx=posicao_x * 13.7, rely=posicao_y * 4, relwidth=0.2)
 
             titulo_categoria.place(relx=posicao_x * 27.4, rely=posicao_y * 3)
-            campo_categoria.place(relx=posicao_x * 27.4, rely=posicao_y * 4)
+            campo_categoria.place(relx=posicao_x * 27.4, rely=posicao_y * 4, relwidth=0.245)
 
             titulo_fornecedor.place(relx=posicao_x, rely=posicao_y * 5)
             campo_fornecedor.place(relx=posicao_x, rely=posicao_y * 6, relwidth=0.1)
+            campo_n_fornecedores.place(relx=posicao_x * 9, rely=posicao_y * 6, relwidth = 0.615)
 
             titulo_shelflife.place(relx=posicao_x, rely=posicao_y * 7)
             titulo_ex_shelflife.place(relx=posicao_x * 6.85, rely = posicao_y * 7)
@@ -277,9 +355,12 @@ class GerenciadorJanelas:
 
             titulo_custo.place(relx=posicao_x * 28, rely=posicao_y * 7)
             campo_custo.place(relx=posicao_x * 28, rely=posicao_y * 8)
+            titulo_resultado.place(relx=posicao_x, rely=posicao_y * 9)
 
             botao_confirmar.place(relx=posicao_x, rely=posicao_y * 13.1)
             botao_apagar.place(relx=posicao_x * 13.7, rely=posicao_y * 13.1)
+
+            #eventos
 
             #exibi a janela ativa ocultando a janela menu
             self.abrir_janela()
