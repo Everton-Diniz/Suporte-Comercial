@@ -53,11 +53,17 @@ class GerenciadorJanelas:
             #chama a função fechar_janela quando o evento de fechar a jenala ativa for ativado.
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
+            #Varviaveis Base
+            fonte_padrao = ('Arial', 15, 'bold')
+            posicao_x = 0.02
+            posicao_y = 0.1
+            teclas_numericas = [8,36,37,38,39,40,46,48,49,50,51,52,53,54,55,56,57,96,97,98,99,100,101,102,103,104,105]
+
             #funções
             #Responsavel por realizar o cadastro com segurança dos dados do Fornecedor
             def Cadastrar_Fornecedor():
                 #verifica se todos os campos foram preenchidos
-                if campo_nome_forn.get() != '' and campo_nome_repr.get() != '' and  campo_cnpj.get() != '':
+                if campo_nome_forn.get() != '' and campo_nome_repr.get() != '' and  campo_cnpj.get() != ''and len(campo_cnpj.get()) == 19:
                     #Verifica a existencia do arquivo .json responsavel por conter os registros de fornecedores.
                     if os.path.exists('Base Fornecedores/Fornecedores.json'):
                         forn_cadastrados = {}
@@ -83,7 +89,7 @@ class GerenciadorJanelas:
                                         json.dump(forn_cadastrados, arquivo, indent=4)
                                         titulo_resultado.configure(text=f'Fornecedor foi Cadastrado com sucesso! Nº:{len(forn_cadastrados)}.', text_color='Green') 
                                 except IOError as e:
-                                    titulo_resultado.configure(text=f'Erro {e}') 
+                                    titulo_resultado.configure(text=f'Erro {e}', text_color='Red') 
                                 apagar()
                     else:
                         forn_cadastrados = {}
@@ -96,6 +102,8 @@ class GerenciadorJanelas:
                             titulo_resultado.configure(text=f'Erro {e}', text_color='red')
                         titulo_resultado.configure(text=f'Fornecedor foi Cadastrado com sucesso! Nº:{len(forn_cadastrados)}.', text_color='Green')
                         apagar()
+                elif len(campo_cnpj.get()) < 19:
+                    titulo_resultado.configure(text='Por gentileza insira o CNPJ corretamente.', text_color='Red')
                 else:
                     titulo_resultado.configure(text='Todos os campos devem estar preenchidos.', text_color='Red')
 
@@ -115,24 +123,24 @@ class GerenciadorJanelas:
             #define o padrão e limita a entrada de caracteres para apenas numericos.
             def modelo_cnpj(ferramenta):
                 texto = str(ferramenta.widget.get())
-                if ferramenta.keycode > 48 and ferramenta.keycode < 58 or ferramenta.keycode > 96 and ferramenta.keycode < 105 or ferramenta.keycode > 36 and ferramenta.keycode < 41:
+                if ferramenta.keycode in teclas_numericas:
                     if len(texto) > 3 and texto.count('.') < 1:
-                        texto = texto[0:3] + '.' + texto[4:19]
+                        texto = texto[0:3] + '.' + texto[3:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
                     
                     if len(texto) > 7 and texto.count('.') < 2:
-                        texto = texto[0:7] + '.' + texto[8:19]
+                        texto = texto[0:7] + '.' + texto[7:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
                     
                     if len(texto) > 11 and texto.count('/') < 1:
-                        texto = texto[0:11] + '/' + texto[12:19]
+                        texto = texto[0:11] + '/' + texto[11:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
                     
                     if len(texto) > 16 and texto.count('-') < 1:
-                        texto = texto[0:16] + '-' + texto[17:19]
+                        texto = texto[0:16] + '-' + texto[16:19]
                         ferramenta.widget.delete(0, ctk.END)
                         ferramenta.widget.insert(0, texto)
                     
@@ -144,10 +152,6 @@ class GerenciadorJanelas:
                     texto = texto[0:texto.find(ferramenta.char)] + texto[texto.find(ferramenta.char)+1:20]
                     ferramenta.widget.delete(0, ctk.END)
                     ferramenta.widget.insert(0, texto)
-
-            fonte_padrao = ('Arial', 15, 'bold')
-            posicao_x = 0.02
-            posicao_y = 0.1
     
             #titulos
             titulo_nome_forn = ctk.CTkLabel(self.janela, text='Nome do Fornecedor:', font=fonte_padrao)
@@ -193,8 +197,12 @@ class GerenciadorJanelas:
             #chama a função fechar_janela quando o evento de fechar a jenala ativa for ativado.
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
+            #Variaveis Base
+            fonte_padrao = ('arial', 15, 'bold')
+            posicao_x = 0.02
+            posicao_y = 0.15
+            
             #funções
-
             def maiuscula(ferramenta):
                 texto = ferramenta.widget.get()
                 texto = texto.upper()
@@ -204,13 +212,37 @@ class GerenciadorJanelas:
             def salvar_categoria():
                 if campo_categoria.get() != '':
                     campo_categoria.get()
-                    if os.path.exists(f'Base Itens/{campo_categoria.get()}.json'):
-                        titulo_resultado.configure(text='Não é possivel criar uma categoria já existente.', text_color='red')
+                    if os.path.exists(f'Base Categoria/Categorias.json'):
+                        try:
+                            with open('Base Categoria/Categorias.json', 'r') as arquivo:
+                                cate_cadastradas = json.load(arquivo)
+                                categoria_existente = False
+                                for var_consul in cate_cadastradas:
+                                    if campo_categoria.get() in cate_cadastradas[var_consul]:
+                                        categoria_existente = True
+                                        break
+                            if categoria_existente:
+                                titulo_resultado.configure(text='Não é possivel criar uma categoria já existente.', text_color='red')
+                            else:
+                                if isinstance(campo_categoria.get(), str):
+                                    cate_cadastradas[len(cate_cadastradas) + 1] = [campo_categoria.get()]
+                                    try:
+                                        with open('Base Categoria/Categorias.json','w') as arquivo:
+                                            json.dump(cate_cadastradas, arquivo, indent=4)
+                                            titulo_resultado.configure(text=f'Categoria foi Cadastrada com sucessso! Nº:{len(cate_cadastradas)}', text_color='Green')
+                                    except IOError as e:
+                                        titulo_resultado.configure(text=f'Erro no salvamento da categoria. Erro: {e}', text_color='Red')
+                                    apagar()
+                        except IOError as e:
+                            titulo_resultado.configure(text=f'Erro na leitura do arquivo existente. Error: {e}', text_color='Red')
                     else:
                         try:
-                            with open(f'Base Itens/{campo_categoria.get()}.json', 'w') as arquivo:
-                                json.dump('', arquivo, indent=4)
+                            with open(f'Base Categoria/Categorias.json', 'w') as arquivo:
+                                cate_cadastradas = {}
+                                cate_cadastradas[len(cate_cadastradas)+1] = [campo_categoria.get()]
+                                json.dump(cate_cadastradas, arquivo, indent=4)
                                 titulo_resultado.configure(text='Categoria criada com sucesso', text_color='green')
+                                apagar()
                         except IOError as e:
                             titulo_resultado.configure(text=f'Erro {e}', text_color='red')
                 else:
@@ -218,10 +250,6 @@ class GerenciadorJanelas:
 
             def apagar():
                 campo_categoria.delete(0,ctk.END)
-
-            fonte_padrao = ('arial', 15, 'bold')
-            posicao_x = 0.02
-            posicao_y = 0.15
 
             #titulos
             titulo_categoria = ctk.CTkLabel(self.janela, text='Categoria:', font=fonte_padrao)
@@ -254,6 +282,25 @@ class GerenciadorJanelas:
             self.janela.geometry('600x475')
             self.janela.protocol('WM_DELETE_WINDOW', self.fechar_janela)
 
+            #Variaveis Base
+            fonte_padrao = ('Arial', 15, 'bold')
+            posicao_x = 0.02
+            posicao_y = 0.07
+            teclas_numericas = [8,36,37,38,39,40,46,48,49,50,51,52,53,54,55,56,57,96,97,98,99,100,101,102,103,104,105]
+
+            def maiuscula(ferramenta):
+                texto = ferramenta.widget.get()
+                texto = texto.upper()
+                ferramenta.widget.delete(0, ctk.END)
+                ferramenta.widget.insert(0, texto)
+
+            def numerico(ferramenta):
+                if not ferramenta.keycode in teclas_numericas:
+                    texto = str(ferramenta.widget.get())
+                    texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:]
+                    ferramenta.widget.delete(0, ctk.END)
+                    ferramenta.widget.insert(0, texto)
+
             def apagar():
                 campo_descricao.delete(0, ctk.END)
                 campo_ean.delete(0,ctk.END)
@@ -266,18 +313,19 @@ class GerenciadorJanelas:
                 
             def lista_categoria():
                 retorno = ''
-                try:
-                    nomes_categorias = [itens_lista for itens_lista in os.listdir('Base Itens/') if os.path.isfile(os.path.join('Base Itens/', itens_lista))]
-                    lista_nomes = ['']
-                    if len(nomes_categorias) > 0:
-                        for nome in nomes_categorias:
-                            lista_nomes.append(nome[0:nome.find('.')])
-                    else:
-                        retorno = 'Não existe categorias cadastradas.'
-                except FileNotFoundError:
-                    retorno = 'A pasta Base Itens não foi encontrada.'
-                except OSError as e:
-                    retorno = f'Erro ao acessar a pasta Base Itens: {e}'
+                if os.path.exists(f'Base Categoria/Categorias.json'):    
+                    try:
+                        with open(f'Base Categoria/Categorias.json', 'r') as arquivo:
+                            lista_nomes = ['']
+                            categorias = json.load(arquivo)
+                            for nome in categorias:
+                                lista_nomes.append(categorias[nome][0])
+                    except FileNotFoundError:
+                        retorno = 'A pasta "Base Categoria" não foi encontrada.'
+                    except OSError as e:
+                        retorno = f'Erro ao acessar a pasta Base Categoria: {e}'
+                else:
+                    retorno = 'Não existe categorias cadastradas.'
                 return lista_nomes, retorno
             
             def lista_fornecedores():
@@ -288,7 +336,7 @@ class GerenciadorJanelas:
                         with open(f'Base Fornecedores/Fornecedores.json', 'r') as arquivo:
                             fornecedores = json.load(arquivo)
                             for nome in fornecedores:
-                                lista_nome_forn.append(nome[0])
+                                lista_nome_forn.append(fornecedores[nome][0])
                     except FileNotFoundError:
                         retorno = 'A pasta "Base Fornecedores" não foi encontrada'
                     except OSError as e:
@@ -296,12 +344,6 @@ class GerenciadorJanelas:
                 else:
                     retorno='Não existe fornecedores cadastrados.'
                 return lista_nome_forn, retorno
-        
-
-
-            fonte_padrao = ('Arial', 15, 'bold')
-            posicao_x = 0.02
-            posicao_y = 0.07
 
             #titulos
             titulo_descricao = ctk.CTkLabel(self.janela, text='Descrição do Item:', font=fonte_padrao)
@@ -361,6 +403,10 @@ class GerenciadorJanelas:
             botao_apagar.place(relx=posicao_x * 13.7, rely=posicao_y * 13.1)
 
             #eventos
+            campo_descricao.bind('<KeyRelease>', maiuscula)
+            campo_dun.bind('<KeyRelease>', numerico)
+            campo_ean.bind('<KeyRelease>', numerico)
+            campo_fornecedor.bind('<KeyRelease>', numerico)
 
             #exibi a janela ativa ocultando a janela menu
             self.abrir_janela()
