@@ -286,7 +286,7 @@ class GerenciadorJanelas:
             fonte_padrao = ('Arial', 15, 'bold')
             posicao_x = 0.02
             posicao_y = 0.07
-            teclas_numericas = [8,36,37,38,39,40,46,48,49,50,51,52,53,54,55,56,57,96,97,98,99,100,101,102,103,104,105]
+            teclas_numericas = [8,16,17,36,37,38,39,40,46,48,49,50,51,52,53,54,55,56,57,96,97,98,99,100,101,102,103,104,105]
 
             def maiuscula(ferramenta):
                 texto = ferramenta.widget.get()
@@ -295,11 +295,20 @@ class GerenciadorJanelas:
                 ferramenta.widget.insert(0, texto)
 
             def numerico(ferramenta):
+                print(ferramenta.widget)
                 if not ferramenta.keycode in teclas_numericas:
                     texto = str(ferramenta.widget.get())
                     texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:]
                     ferramenta.widget.delete(0, ctk.END)
                     ferramenta.widget.insert(0, texto)
+
+            def calculo_de_shelf(ferramenta):
+                if 'ctkentry5' in str(ferramenta.widget):
+                    campo_shelflife_max.delete(0, ctk.END)
+                    campo_shelflife_max.insert(0, f'{float(ferramenta.widget.get()) * 1.75}')
+                elif 'ctkentry6' in str(ferramenta.widget):
+                    campo_shelflife_min.delete(0, ctk.END)
+                    campo_shelflife_min.insert(0, f'{float(ferramenta.widget.get()) * 0.25}')
 
             def apagar():
                 campo_descricao.delete(0, ctk.END)
@@ -313,10 +322,10 @@ class GerenciadorJanelas:
                 
             def lista_categoria():
                 retorno = ''
+                lista_nomes = ['']
                 if os.path.exists(f'Base Categoria/Categorias.json'):    
                     try:
                         with open(f'Base Categoria/Categorias.json', 'r') as arquivo:
-                            lista_nomes = ['']
                             categorias = json.load(arquivo)
                             for nome in categorias:
                                 lista_nomes.append(categorias[nome][0])
@@ -407,6 +416,9 @@ class GerenciadorJanelas:
             campo_dun.bind('<KeyRelease>', numerico)
             campo_ean.bind('<KeyRelease>', numerico)
             campo_fornecedor.bind('<KeyRelease>', numerico)
+            campo_shelflife_max.bind('<KeyRelease>', calculo_de_shelf)
+            campo_shelflife_min.bind('<KeyRelease>', calculo_de_shelf)
+
 
             #exibi a janela ativa ocultando a janela menu
             self.abrir_janela()
