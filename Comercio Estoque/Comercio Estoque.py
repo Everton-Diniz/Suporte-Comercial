@@ -303,12 +303,13 @@ class GerenciadorJanelas:
                     ferramenta.widget.insert(0, texto)
 
             def calculo_de_shelf(ferramenta):
-                if 'ctkentry5' in str(ferramenta.widget):
-                    campo_shelflife_max.delete(0, ctk.END)
-                    campo_shelflife_max.insert(0, f'{float(ferramenta.widget.get()) * 1.75}')
-                elif 'ctkentry6' in str(ferramenta.widget):
-                    campo_shelflife_min.delete(0, ctk.END)
-                    campo_shelflife_min.insert(0, f'{float(ferramenta.widget.get()) * 0.25}')
+                if ferramenta.keycode in teclas_numericas:
+                    if 'ctkentry5' in str(ferramenta.widget):
+                        campo_shelflife_max.delete(0, ctk.END)
+                        campo_shelflife_max.insert(0, f'{float(ferramenta.widget.get()) * 1.75}')
+                    elif 'ctkentry6' in str(ferramenta.widget):
+                        campo_shelflife_min.delete(0, ctk.END)
+                        campo_shelflife_min.insert(0, f'{float(ferramenta.widget.get()) * 0.25}')
 
             def apagar():
                 campo_descricao.delete(0, ctk.END)
