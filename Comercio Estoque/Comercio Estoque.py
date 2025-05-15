@@ -306,10 +306,10 @@ class GerenciadorJanelas:
                 if ferramenta.keycode in teclas_numericas and ferramenta.keycode not in (8,46,37,38,39,40) and len(ferramenta.widget.get())<5:
                     if 'ctkentry5' in str(ferramenta.widget):
                         campo_shelflife_max.delete(0, ctk.END)
-                        campo_shelflife_max.insert(0, f'{int(float(ferramenta.widget.get()) * 2)}')
+                        campo_shelflife_max.insert(0, f'{int(float(ferramenta.widget.get()) * 1.25)}')
                     elif 'ctkentry6' in str(ferramenta.widget):
                         campo_shelflife_min.delete(0, ctk.END)
-                        campo_shelflife_min.insert(0, f'{int(float(ferramenta.widget.get()) * 0.5)}')
+                        campo_shelflife_min.insert(0, f'{round(float(ferramenta.widget.get()) * 0.8)}')
                 elif not ferramenta.keycode in teclas_numericas or len(ferramenta.widget.get())>4:
                     texto = str(ferramenta.widget.get())
                     texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:]
@@ -323,10 +323,10 @@ class GerenciadorJanelas:
                 else:
                     if 'ctkentry5' in str(ferramenta.widget):
                         campo_shelflife_max.delete(0, ctk.END)
-                        campo_shelflife_max.insert(0, f'{int(float(ferramenta.widget.get()) * 2)}')
+                        campo_shelflife_max.insert(0, f'{int(float(ferramenta.widget.get()) * 1.25)}')
                     elif 'ctkentry6' in str(ferramenta.widget):
                         campo_shelflife_min.delete(0, ctk.END)
-                        campo_shelflife_min.insert(0, f'{int(float(ferramenta.widget.get()) * 0.5)}')
+                        campo_shelflife_min.insert(0, f'{round(float(ferramenta.widget.get()) * 0.80)}')
 
 
             def apagar():
