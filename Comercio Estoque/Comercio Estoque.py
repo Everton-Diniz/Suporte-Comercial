@@ -303,13 +303,31 @@ class GerenciadorJanelas:
                     ferramenta.widget.insert(0, texto)
 
             def calculo_de_shelf(ferramenta):
-                if ferramenta.keycode in teclas_numericas:
+                if ferramenta.keycode in teclas_numericas and ferramenta.keycode not in (8,46,37,38,39,40) and len(ferramenta.widget.get())<5:
                     if 'ctkentry5' in str(ferramenta.widget):
                         campo_shelflife_max.delete(0, ctk.END)
-                        campo_shelflife_max.insert(0, f'{float(ferramenta.widget.get()) * 1.75}')
+                        campo_shelflife_max.insert(0, f'{int(float(ferramenta.widget.get()) * 2)}')
                     elif 'ctkentry6' in str(ferramenta.widget):
                         campo_shelflife_min.delete(0, ctk.END)
-                        campo_shelflife_min.insert(0, f'{float(ferramenta.widget.get()) * 0.25}')
+                        campo_shelflife_min.insert(0, f'{int(float(ferramenta.widget.get()) * 0.5)}')
+                elif not ferramenta.keycode in teclas_numericas or len(ferramenta.widget.get())>4:
+                    texto = str(ferramenta.widget.get())
+                    texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:]
+                    ferramenta.widget.delete(0, ctk.END)
+                    ferramenta.widget.insert(0, texto)
+                elif ferramenta.keycode in (8,46) and len(ferramenta.widget.get()) ==0:
+                    if 'ctkentry5' in str(ferramenta.widget):
+                        campo_shelflife_max.delete(0, ctk.END)
+                    elif 'ctkentry6' in str(ferramenta.widget):
+                        campo_shelflife_min.delete(0, ctk.END)
+                else:
+                    if 'ctkentry5' in str(ferramenta.widget):
+                        campo_shelflife_max.delete(0, ctk.END)
+                        campo_shelflife_max.insert(0, f'{int(float(ferramenta.widget.get()) * 2)}')
+                    elif 'ctkentry6' in str(ferramenta.widget):
+                        campo_shelflife_min.delete(0, ctk.END)
+                        campo_shelflife_min.insert(0, f'{int(float(ferramenta.widget.get()) * 0.5)}')
+
 
             def apagar():
                 campo_descricao.delete(0, ctk.END)
