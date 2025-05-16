@@ -295,12 +295,37 @@ class GerenciadorJanelas:
                 ferramenta.widget.insert(0, texto)
 
             def numerico(ferramenta):
-                print(ferramenta.widget)
-                if not ferramenta.keycode in teclas_numericas:
+                print(ferramenta.keycode)
+                if not ferramenta.keycode in teclas_numericas and 'ctkentry7' not in str(ferramenta.widget):
                     texto = str(ferramenta.widget.get())
                     texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:]
                     ferramenta.widget.delete(0, ctk.END)
                     ferramenta.widget.insert(0, texto)
+                elif 'ctkentry2' in str(ferramenta.widget) and len(ferramenta.widget.get()) > 13:
+                    texto = str(ferramenta.widget.get())
+                    texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:14]
+                    ferramenta.widget.delete(0, ctk.END)
+                    ferramenta.widget.insert(0, texto)
+                elif 'ctkentry3' in str(ferramenta.widget) and len(ferramenta.widget.get()) > 14:
+                    texto = str(ferramenta.widget.get())
+                    texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:15]
+                    ferramenta.widget.delete(0, ctk.END)
+                    ferramenta.widget.insert(0, texto)
+                elif 'ctkentry7' in str(ferramenta.widget):
+                    texto = str(ferramenta.widget.get())
+                    if len(ferramenta.widget.get()) < 5:
+                        if ferramenta.keycode in teclas_numericas or ferramenta.keycode in (194, 110):
+                            if texto.count(',') == 2 and texto.count('.') == 0 or texto.find(',') == 0 or texto.count(',') == 0 and texto.count('.') == 2 or texto.find('.') == 0:
+                                texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:5]
+                                ferramenta.widget.delete(0, ctk.END)
+                                ferramenta.widget.insert(0, texto)
+                    else:
+                        texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:5]
+                        ferramenta.widget.delete(0, ctk.END)
+                        ferramenta.widget.insert(0, texto)
+                    
+
+                         
 
             def calculo_de_shelf(ferramenta):
                 if ferramenta.keycode in teclas_numericas and ferramenta.keycode not in (8,46,37,38,39,40) and len(ferramenta.widget.get())<5:
@@ -437,6 +462,7 @@ class GerenciadorJanelas:
             campo_fornecedor.bind('<KeyRelease>', numerico)
             campo_shelflife_max.bind('<KeyRelease>', calculo_de_shelf)
             campo_shelflife_min.bind('<KeyRelease>', calculo_de_shelf)
+            campo_custo.bind('<KeyRelease>', numerico)
 
 
             #exibi a janela ativa ocultando a janela menu
