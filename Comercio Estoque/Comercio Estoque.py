@@ -315,7 +315,12 @@ class GerenciadorJanelas:
                     texto = str(ferramenta.widget.get())
                     if len(ferramenta.widget.get()) < 5:
                         if ferramenta.keycode in teclas_numericas or ferramenta.keycode in (194, 110):
-                            if texto.count(',') == 2 and texto.count('.') == 0 or texto.find(',') == 0 or texto.count(',') == 0 and texto.count('.') == 2 or texto.find('.') == 0:
+                            if texto.count(',') < 2 and texto.count('.') < 1 or texto.count(',') < 1 and texto.count('.') < 2:
+                                if texto.find(',') == 0  or texto.find('.') == 0:
+                                    texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:5]
+                                    ferramenta.widget.delete(0, ctk.END)
+                                    ferramenta.widget.insert(0, texto)
+                            else:
                                 texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:5]
                                 ferramenta.widget.delete(0, ctk.END)
                                 ferramenta.widget.insert(0, texto)
