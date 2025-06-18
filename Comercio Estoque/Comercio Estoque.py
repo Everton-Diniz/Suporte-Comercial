@@ -295,7 +295,7 @@ class GerenciadorJanelas:
                 ferramenta.widget.insert(0, texto)
 
             def numerico(ferramenta):
-                print(ferramenta.keycode)
+                print(ferramenta.char)
                 if not ferramenta.keycode in teclas_numericas and 'ctkentry7' not in str(ferramenta.widget):
                     texto = str(ferramenta.widget.get())
                     texto = texto[0:texto.find(ferramenta.char)]+ texto[texto.find(ferramenta.char)+1:]
@@ -313,11 +313,21 @@ class GerenciadorJanelas:
                     ferramenta.widget.insert(0, texto)
                 elif 'ctkentry7' in str(ferramenta.widget):
                     texto = str(ferramenta.widget.get())
-                    
-                    
 
-                         
-
+            def numerico2(valor_proposto):
+                print(f'{valor_proposto}')
+                if type(valor_proposto) == int:
+                    if len(valor_proposto) <= 5:
+                        return True
+                elif type(valor_proposto) == float:
+                    if len(valor_proposto) <= 5:
+                        return True
+                elif type(valor_proposto) == str:
+                    if valor_proposto.count(',') == 1:
+                        if len(valor_proposto) <=5:
+                            return True
+                return False
+                
             def calculo_de_shelf(ferramenta):
                 if ferramenta.keycode in teclas_numericas and ferramenta.keycode not in (8,46,37,38,39,40) and len(ferramenta.widget.get())<5:
                     if 'ctkentry5' in str(ferramenta.widget):
@@ -388,6 +398,7 @@ class GerenciadorJanelas:
                 else:
                     retorno='Não existe fornecedores cadastrados.'
                 return lista_nome_forn, retorno
+            
 
             #titulos
             titulo_descricao = ctk.CTkLabel(self.janela, text='Descrição do Item:', font=fonte_padrao)
@@ -406,7 +417,8 @@ class GerenciadorJanelas:
             campo_fornecedor = ctk.CTkEntry(self.janela, placeholder_text='Nº Forn.')
             campo_shelflife_min = ctk.CTkEntry(self.janela, placeholder_text='Min')
             campo_shelflife_max = ctk.CTkEntry(self.janela, placeholder_text='Max')
-            campo_custo = ctk.CTkEntry(self.janela, placeholder_text='Ex: 5.25.')
+            validanumero = self.janela.register(numerico2)
+            campo_custo = ctk.CTkEntry(self.janela, placeholder_text='0.00', validate='key', validatecommand=(validanumero, '%P'))
             #Lista
             campo_categoria = ctk.CTkComboBox(self.janela, values=lista_categoria()[0])
             campo_n_fornecedores = ctk.CTkComboBox(self.janela, values=lista_fornecedores()[0])
@@ -453,7 +465,6 @@ class GerenciadorJanelas:
             campo_fornecedor.bind('<KeyRelease>', numerico)
             campo_shelflife_max.bind('<KeyRelease>', calculo_de_shelf)
             campo_shelflife_min.bind('<KeyRelease>', calculo_de_shelf)
-            campo_custo.bind('<KeyRelease>', numerico)
 
 
             #exibi a janela ativa ocultando a janela menu
