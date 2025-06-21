@@ -319,13 +319,6 @@ class GerenciadorJanelas:
                 if type(valor_proposto) == int:
                     if len(valor_proposto) <= 5:
                         return True
-                elif type(valor_proposto) == float:
-                    if len(valor_proposto) <= 5:
-                        return True
-                elif type(valor_proposto) == str:
-                    if valor_proposto.count(',') == 1:
-                        if len(valor_proposto) <=5:
-                            return True
                 return False
                 
             def calculo_de_shelf(ferramenta):
@@ -353,7 +346,6 @@ class GerenciadorJanelas:
                     elif 'ctkentry6' in str(ferramenta.widget):
                         campo_shelflife_min.delete(0, ctk.END)
                         campo_shelflife_min.insert(0, f'{round(float(ferramenta.widget.get()) * 0.80)}')
-
 
             def apagar():
                 campo_descricao.delete(0, ctk.END)
@@ -398,8 +390,44 @@ class GerenciadorJanelas:
                 else:
                     retorno='Não existe fornecedores cadastrados.'
                 return lista_nome_forn, retorno
-            
 
+            def cadastrar_item():
+                if os.path.exists('Base Itens/Itens.json'):
+                    itens_cadastrados = {}
+                    item = [campo_descricao.get(), campo_ean.get(), campo_dun.get(), campo_custo.get(), validade_indef.get(), campo_n_fornecedores.get(), campo_categoria.get()]
+                    with open('Base Itens/Itens.json', 'r') as arquivo:
+                        itens_cadastrados = json.load(arquivo)
+                        ean_existente = False
+                        for var_consul in itens_cadastrados:
+                            if item[1] in itens_cadastrados[var_consul]:
+                                ean_existente = True
+                                break
+                        if ean_existente:
+                            print('não foi possivel cadastrar')
+                        else:
+                            if isinstance(itens_cadastrados, str):
+                                itens_cadastrados = {}
+                            
+                            itens_cadastrados[len(itens_cadastrados)+1] = item
+                            try:
+                                with open('Base Itens/Itens.json', 'w') as arquivo:
+                                    json.dump(itens_cadastrados, arquivo, indent=4)
+                                    print('Salvo com sucesso')
+                            except IOError as e:
+                                print(f'erro {e}')
+                            apagar()
+                else:
+                    itens_cadastrados = {}
+                    item = [campo_descricao.get(), campo_ean.get(), campo_dun.get(), campo_custo.get(),validade_indef.get(), campo_n_fornecedores.get(), campo_categoria.get()]
+                    itens_cadastrados[len(itens_cadastrados)+1] = item
+                    try:
+                        with open('Base Itens/Itens.json', 'w') as arquivo:
+                            json.dump(itens_cadastrados, arquivo, indent=4)
+                    except IOError as e:
+                        print(f'Erro {e}')
+                    apagar()
+                
+            
             #titulos
             titulo_descricao = ctk.CTkLabel(self.janela, text='Descrição do Item:', font=fonte_padrao)
             titulo_ean = ctk.CTkLabel(self.janela, text='Código EAN:', font=fonte_padrao)
@@ -425,7 +453,7 @@ class GerenciadorJanelas:
             #checkbox
             validade_indef = ctk.CTkCheckBox(self.janela, text='Validade Indefinida', font=fonte_padrao)
             #botoes
-            botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao)
+            botao_confirmar = ctk.CTkButton(self.janela, text='Confirmar', fg_color='#008080', font=fonte_padrao, command=cadastrar_item)
             botao_apagar = ctk.CTkButton(self.janela, text='Apagar', fg_color='#8b0000', font=fonte_padrao, command=apagar)
             
             #posicionamento
